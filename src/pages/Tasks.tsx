@@ -7,7 +7,7 @@ import {
   SortableContext, verticalListSortingStrategy, useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Plus, Clock, Flag, User, Search, Filter } from 'lucide-react';
+import { Plus, Clock, Flag, User, Search, Filter, X } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import { formatDate, priorityColor, getInitials } from '../lib/utils';
 import type { Task, TaskStatus } from '../types';
@@ -151,13 +151,15 @@ export default function Tasks() {
     e.preventDefault();
     addTask({
       ...newTask,
+      description: '',
       status: 'todo',
       dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-      tags: [],
-      hoursLogged: 0,
+      labels: [],
+      loggedHours: 0,
       estimatedHours: newTask.estimate,
       subtasks: [],
-      attachments: []
+      comments: [],
+      order: tasks.length
     });
     setIsAdding(false);
     setNewTask({ title: '', projectId: projects[0]?.id || '', assigneeId: users[0]?.id || '', priority: 'medium', estimate: 0 });

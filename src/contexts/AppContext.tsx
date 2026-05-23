@@ -57,20 +57,40 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | null>(null);
 
+// Helper to load from localStorage
+const getLocal = <T,>(key: string, backup: T): T => {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : backup;
+  } catch {
+    return backup;
+  }
+};
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [projects, setProjects] = useState<Project[]>(PROJECTS);
-  const [tasks, setTasks] = useState<Task[]>(TASKS);
-  const [timeEntries, setTimeEntries] = useState<TimeEntry[]>(TIME_ENTRIES);
-  const [invoices, setInvoices] = useState<Invoice[]>(INVOICES);
-  const [documents, setDocuments] = useState<Document[]>(DOCUMENTS);
-  const [clients, setClients] = useState<Client[]>(CLIENTS);
-  const [notifications, setNotifications] = useState(NOTIFICATIONS);
-  const [activityLogs, setActivityLogs] = useState(ACTIVITY_LOGS);
+  const [projects, setProjects] = useState<Project[]>(() => getLocal('agency_projects', PROJECTS));
+  const [tasks, setTasks] = useState<Task[]>(() => getLocal('agency_tasks', TASKS));
+  const [timeEntries, setTimeEntries] = useState<TimeEntry[]>(() => getLocal('agency_time', TIME_ENTRIES));
+  const [invoices, setInvoices] = useState<Invoice[]>(() => getLocal('agency_invoices', INVOICES));
+  const [documents, setDocuments] = useState<Document[]>(() => getLocal('agency_documents', DOCUMENTS));
+  const [clients, setClients] = useState<Client[]>(() => getLocal('agency_clients', CLIENTS));
+  const [notifications, setNotifications] = useState(() => getLocal('agency_notifications', NOTIFICATIONS));
+  const [activityLogs, setActivityLogs] = useState(() => getLocal('agency_activity', ACTIVITY_LOGS));
   
   const [timer, setTimer] = useState<TimerState>({
     running: false, startTime: null, elapsed: 0,
     projectId: '', taskId: '', billable: true, notes: ''
   });
+
+  // Persistence Effects
+  React.useEffect(() => { localStorage.setItem('agency_projects', JSON.stringify(projects)); }, [projects]);
+  React.useEffect(() => { localStorage.setItem('agency_tasks', JSON.stringify(tasks)); }, [tasks]);
+  React.useEffect(() => { localStorage.setItem('agency_time', JSON.stringify(timeEntries)); }, [timeEntries]);
+  React.useEffect(() => { localStorage.setItem('agency_invoices', JSON.stringify(invoices)); }, [invoices]);
+  React.useEffect(() => { localStorage.setItem('agency_documents', JSON.stringify(documents)); }, [documents]);
+  React.useEffect(() => { localStorage.setItem('agency_clients', JSON.stringify(clients)); }, [clients]);
+  React.useEffect(() => { localStorage.setItem('agency_notifications', JSON.stringify(notifications)); }, [notifications]);
+  React.useEffect(() => { localStorage.setItem('agency_activity', JSON.stringify(activityLogs)); }, [activityLogs]);
 
   const addActivity = useCallback((detail: string, userId: string, entityId: string, entityType: string) => {
     setActivityLogs(prev => [{
